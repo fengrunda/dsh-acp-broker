@@ -1,0 +1,58 @@
+{
+  "name": "dsh-acp-broker",
+  "version": "0.1.0",
+  "description": "Long-lived ACP multi-session broker for DeepSeek Harness: keep named ticket sessions co-resident in one `dsh --profile acp` process so team-rooms live followup works from a thin CLI.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "dsh-acp-broker": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-acp",
+    "acp",
+    "agent-client-protocol",
+    "deepseek-harness",
+    "broker",
+    "multi-session",
+    "team-rooms",
+    "daemon"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  },
+  "dsh": {
+    "bundle": {
+      "comment": "Placeholder manifest for a future optional dsh.bundle. Names below are fake examples and ship no implementation in this slice.",
+      "tools": [
+        "example_broker_ping"
+      ],
+      "skills": [
+        "example-broker-hello"
+      ]
+    }
+  }
+}

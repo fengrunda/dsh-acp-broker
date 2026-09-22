@@ -1,0 +1,23 @@
+# build output
+dist/
+*.tsbuildinfo
+
+# dependencies
+node_modules/
+
+# broker runtime state (default dir)
+.dsh-broker/
+
+# logs / pids / sockets
+*.log
+*.pid
+*.sock
+
+# editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+
+# local env
+.env
+.env.*
