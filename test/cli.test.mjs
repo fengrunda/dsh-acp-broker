@@ -73,3 +73,27 @@ test("CLI: status exits non-zero when no broker is running", async () => {
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+
+test("CLI: main runs when invoked through a symlink (npm link regression)", async () => {
+  const dir = await tempDir();
+  const link = path.join(dir, "dsh-acp-broker");
+  const stateDir = path.join(dir, "state");
+  try {
+    // npm link installs a symlink whose argv[1] is the link path while
+    // import.meta.url resolves to the real dist/cli.js; the is-main guard must
+    // still fire instead of silently exiting 0.
+    await fs.symlink(cliPath, link);
+
+    const help = await run(process.execPath, [link, "--help"], { cwd: repoRoot });
+    assert.match(help.stdout, /Usage:/);
+    assert.match(help.stdout, /dsh-acp-broker start/);
+
+    await assert.rejects(
+      () => run(process.execPath, [link, "status", "--dir", stateDir], { cwd: repoRoot }),
+      (err) => err.code === 1 && /not running/.test(err.stderr),
+      "symlinked status must run and report the missing broker",
+    );
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});

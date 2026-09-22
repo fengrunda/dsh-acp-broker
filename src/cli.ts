@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -257,9 +258,28 @@ async function main(argv: string[]): Promise<number> {
   }
 }
 
-const invokedDirectly =
-  process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+/**
+ * Robust ESM "is main module" check.
+ *
+ * `process.argv[1]` keeps whatever path the user typed, so when the CLI is
+ * reached through an `npm link` symlink (e.g. ~/.local/bin/dsh-acp-broker ->
+ * dist/cli.js) a lexical `path.resolve(argv[1])` comparison against
+ * `import.meta.url` fails even though the same file is running. Resolving both
+ * sides with `fs.realpathSync` makes symlinked and direct invocations match.
+ */
+function isInvokedDirectly(): boolean {
+  const argv1 = process.argv[1];
+  if (argv1 === undefined) return false;
+  const modulePath = fileURLToPath(import.meta.url);
+  try {
+    return fs.realpathSync(argv1) === fs.realpathSync(modulePath);
+  } catch {
+    // realpath can fail on exotic paths; fall back to a lexical comparison.
+    return path.resolve(argv1) === path.resolve(modulePath);
+  }
+}
+
+const invokedDirectly = isInvokedDirectly();
 
 if (invokedDirectly) {
   main(process.argv.slice(2))
